@@ -3,6 +3,7 @@
  */
 package it.unicam.cs.asdl2021.mp2.Task1;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -36,8 +37,7 @@ import java.util.Set;
  * Questa classe non supporta le operazioni di rimozione di nodi e archi e le
  * operazioni indicizzate di ricerca di nodi e archi.
  * 
- * @author Template: Luca Tesei, Implementation: INSERIRE NOME E COGNOME DELLO
- *         STUDENTE - INSERIRE ANCHE L'EMAIL xxxx@studenti.unicam.it
+ * @author Template: Luca Tesei, Implementation: NICCOLO' CUARTAS - niccolo.cuartas@studenti.unicam.it
  *
  * @param <L>
  *                etichette dei nodi del grafo
@@ -68,14 +68,17 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
 
     @Override
     public int nodeCount() {
-        // TODO implementare
-        return -1;
+        return this.adjacentLists.keySet().size();
     }
 
     @Override
     public int edgeCount() {
-        // TODO implementare
-        return -1;
+        if(this.getEdges()==null) return 0;
+        int count = 0;
+        for (GraphNode<L> keyNode: this.getNodes()) {
+            count += this.adjacentLists.get(keyNode).size();
+        }
+        return count;
     }
 
     @Override
@@ -91,14 +94,17 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
 
     @Override
     public Set<GraphNode<L>> getNodes() {
-        // TODO implementare
-        return null;
+        return this.adjacentLists.keySet();
     }
 
     @Override
     public boolean addNode(GraphNode<L> node) {
-        // TODO implementare
-        return false;
+        if(node==null) throw new NullPointerException();
+        if(this.containsNode(node))
+            return false;
+
+        this.adjacentLists.put(node, new HashSet<GraphEdge<L>>());//aggiunta una nuova "riga" all'hashmap, non ci sono valori associati al nuovo nodo (archi)
+        return true;
     }
 
     @Override
@@ -112,13 +118,20 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
 
     @Override
     public boolean containsNode(GraphNode<L> node) {
-        // TODO implementare
-        return false;
+        if(node==null) throw new NullPointerException();
+        return this.adjacentLists.containsKey(node);
     }
 
     @Override
     public GraphNode<L> getNodeOf(L label) {
-        // TODO implementare
+        if(label==null) throw new NullPointerException("Etichetta nulla");
+        Set<GraphNode<L>> setNodes = this.getNodes();
+        GraphNode<L> nl = new GraphNode<>(label);
+        for(GraphNode<L> node : setNodes)
+        {
+            if (node.equals(nl))//l'obj da passare a equals è il nodo che ha label
+                return node;
+        }
         return null;
     }
 
@@ -139,26 +152,56 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
 
     @Override
     public Set<GraphNode<L>> getAdjacentNodesOf(GraphNode<L> node) {
-        // TODO implementare
-        return null;
+        if(node==null) throw new NullPointerException();
+        if(!this.containsNode(node)) throw new IllegalArgumentException();
+        //Set<GraphEdge<L>> setEdges = this.adjacentLists.get(node); //inserisco in un set tutti gli archi (coppie di nodi che contengono il nodo richiesto) deprecated
+        Set<GraphEdge<L>> setEdges = this.getEdgesOf(node); //inserisco in un set tutti gli archi (coppie di nodi che contengono il nodo richiesto)
+        Set<GraphNode<L>> setNodes = new HashSet<>(); //lista dei nodi selezionati che verrà restituita, verranno selezionati di seguito
+        for (GraphEdge<L> edge : setEdges) {//seleziono i nodi diversi da quello passato
+            setNodes.add(edge.getNode2()); //nello specifico questo grafo è orientato, e come specificato su GraphEdge il nodo 2 è il nodo destinazione diverso dal nodo passato
+        }
+
+        return setNodes;
     }
 
     @Override
     public Set<GraphNode<L>> getPredecessorNodesOf(GraphNode<L> node) {
-        // TODO implementare
-        return null;
+        if(!isDirected()) throw new UnsupportedOperationException("Il grafo non è orientato");
+        if(!this.containsNode(node)) throw new IllegalArgumentException("Il nodo non esiste");
+        if(node==null) throw new NullPointerException("Il nodo passato è nullo");
+
+        Set<GraphNode<L>> setKeyNodes = this.getNodes(); //lista di tutti i nodi della mappa che andranno analizzati
+        Set<GraphNode<L>> predNodes = new HashSet<>();//lista (vuota inizialmente) dei nodi che soddisferanno la richiesta (i predecessori del nodo passato)
+        for(GraphNode<L> keyNode : setKeyNodes)//scorro la lista dei nodi di tutta la mappa
+        {
+            Set<GraphEdge<L>> setEdges = this.getEdgesOf(keyNode); //inserisco in un set tutti gli archi (coppie di nodi che contengono il nodo corrente)
+            for(GraphEdge<L> edge : setEdges)
+            {
+                if(edge.getNode2().equals(node))//se il nodo passato è presente nel node2 dell'edge analizzato,
+                    predNodes.add(edge.getNode1());// allora node1 sarà sicuramente il predecessore e deve essere aggiunto a una set (ricordiamo che il grafo in questione è orientato)
+            }
+        }
+        return predNodes;
     }
 
     @Override
     public Set<GraphEdge<L>> getEdges() {
-        // TODO implementare
-        return null;
+        Set<GraphNode<L>> setKeyNodes = this.getNodes();
+        Set<GraphEdge<L>> setEdges = new HashSet<>();
+
+        for(GraphNode<L> keyNode : setKeyNodes)
+        {
+            setEdges.addAll(this.getEdgesOf(keyNode));
+        }
+        return setEdges;
     }
 
     @Override
     public boolean addEdge(GraphEdge<L> edge) {
-        // TODO implementare
-        return false;
+        if(edge==null) throw new NullPointerException();
+        if(!this.containsNode(edge.getNode1()) || !this.containsNode(edge.getNode2()) || (this.isDirected() && !edge.isDirected()) || (!this.isDirected() && edge.isDirected())) throw new IllegalArgumentException();
+
+        return this.getEdgesOf(edge.getNode1()).add(edge);
     }
 
     @Override
@@ -169,20 +212,39 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
 
     @Override
     public boolean containsEdge(GraphEdge<L> edge) {
-        // TODO implementare
-        return true;
+        if(edge==null) throw new NullPointerException();
+        if(!this.containsNode(edge.getNode1()) || !this.containsNode(edge.getNode2())) throw new IllegalArgumentException();
+        return this.getEdges().contains(edge);//funzionano entrambi i modi
+
+        /*Set<GraphEdge<L>> edges = this.getEdgesOf(edge.getNode1());
+        for(GraphEdge<L> e : edges)
+        {
+            if(e.getNode2().equals(edge.getNode2()))
+                return true;
+        }
+        return false;*/
     }
 
     @Override
     public Set<GraphEdge<L>> getEdgesOf(GraphNode<L> node) {
-        // TODO implementare
-        return null;
+        if(node==null) throw new NullPointerException("Nodo nullo");
+        if(!this.containsNode(node)) throw new IllegalArgumentException("Nodo non esiste");
+        return this.adjacentLists.get(node);
     }
 
     @Override
     public Set<GraphEdge<L>> getIngoingEdgesOf(GraphNode<L> node) {
-        // TODO implementare
-        return null;
+        if(!isDirected()) throw new UnsupportedOperationException("Grafo non orientato");
+        if(!this.containsNode(node)) throw new IllegalArgumentException("Nodo non esiste");
+        if(node==null) throw new NullPointerException("Nodo nullo");
+        Set<GraphEdge<L>> edgeSet = this.getEdges();
+        Set<GraphEdge<L>> ingEdges = new HashSet<>();
+        for(GraphEdge<L> edge : edgeSet)
+        {
+            if (edge.getNode2().equals(node))
+                ingEdges.add(edge);
+        }
+        return ingEdges;
     }
 
 }
