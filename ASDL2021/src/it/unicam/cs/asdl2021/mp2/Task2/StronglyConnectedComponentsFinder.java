@@ -6,18 +6,20 @@ package it.unicam.cs.asdl2021.mp2.Task2;
 import it.unicam.cs.asdl2021.mp2.Task1.GraphNode;
 import it.unicam.cs.asdl2021.mp2.Task1.Graph;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Set;
 
 /**
  * Un oggetto di questa classe singoletto è un attore che trova le componenti
  * fortemente connesse in un grafo orientato che viene passato come parametro.
  * 
- * @author Template: Luca Tesei, Implementation: INSERIRE NOME E COGNOME DELLO
- *         STUDENTE - INSERIRE ANCHE L'EMAIL xxxx@studenti.unicam.it
+ * @author Template: Luca Tesei, Implementation: NICCOLO' CUARTAS - niccolo.cuartas@studenti.unicam.it
  *
  */
 public class StronglyConnectedComponentsFinder<L> {
-    
+
+    Deque<GraphNode<L>> stack = new ArrayDeque<>();
     /*
      * NOTA: per tutti i metodi che ritornano un set utilizzare la classe
      * HashSet<E> per creare l'insieme risultato. Questo garantisce un buon
@@ -39,10 +41,59 @@ public class StronglyConnectedComponentsFinder<L> {
      *                                      se il grafo passato è nullo
      */
     public Set<Set<GraphNode<L>>> findStronglyConnectedComponents(Graph<L> g) {
-        // TODO implementare
+        if(!g.isDirected()) throw new IllegalArgumentException("Grafo non orientato");
+        if(g==null) throw new NullPointerException();//l'ide ritiene non necessario ma rispetto l'api
+
+        //verrà implementato l'algoritmo di Kosaraju
+        // chiama un algoritmo DFS sul grafo
+        this.DSF(g);
+
         return null;
     }
 
-    // TODO implementare: inserire eventuali metodi privati per rendere
-    // l'implementazione più modulare
-}
+
+    private void DSF(Graph<L> g)
+    {
+
+        for(GraphNode<L> u : g.getNodes())
+        {
+            u.setColor(GraphNode.COLOR_WHITE);
+            u.setPrevious(null);
+        }
+
+        for(GraphNode<L> u : g.getNodes())
+        {
+            if(u.getColor()==GraphNode.COLOR_WHITE)
+                DSFvisit(g, u);
+        }
+    }
+
+    private void DSFvisit(Graph<L> g, GraphNode<L> u){
+
+        u.setColor(GraphNode.COLOR_GREY);
+        if(g.getAdjacentNodesOf(u).isEmpty())
+        {
+            u.setColor(GraphNode.COLOR_BLACK);
+            stack.push(u);
+            DSFvisit(g,u.getPrevious());
+        }
+        else{
+            for (GraphNode<L> v : g.getAdjacentNodesOf(u))//scorro ogni nodo collegato (adiacente) a quello passato
+            {
+                if (v.getColor() == GraphNode.COLOR_WHITE)//se il nodo non è visitato
+                {
+                    v.setPrevious(u);//il precedente di v è u
+                    DSFvisit(g, v);//visito v che diventa u
+                }
+                u.setColor(GraphNode.COLOR_BLACK);//se il nodo è stato visitato, aggiungo il source node (u) allo stack e lo rendo nero
+                stack.push(u);
+
+                System.out.println(stack);
+            }
+        }
+    }
+
+
+    }
+
+

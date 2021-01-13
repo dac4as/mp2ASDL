@@ -154,7 +154,7 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
     public Set<GraphNode<L>> getAdjacentNodesOf(GraphNode<L> node) {
         if(node==null) throw new NullPointerException();
         if(!this.containsNode(node)) throw new IllegalArgumentException();
-        //Set<GraphEdge<L>> setEdges = this.adjacentLists.get(node); //inserisco in un set tutti gli archi (coppie di nodi che contengono il nodo richiesto) deprecated
+
         Set<GraphEdge<L>> setEdges = this.getEdgesOf(node); //inserisco in un set tutti gli archi (coppie di nodi che contengono il nodo richiesto)
         Set<GraphNode<L>> setNodes = new HashSet<>(); //lista dei nodi selezionati che verrà restituita, verranno selezionati di seguito
         for (GraphEdge<L> edge : setEdges) {//seleziono i nodi diversi da quello passato
