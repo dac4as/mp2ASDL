@@ -1,7 +1,10 @@
 package it.unicam.cs.asdl2021.mp2.Task3;
 
+import it.unicam.cs.asdl2021.mp2.Task1.GraphEdge;
 import it.unicam.cs.asdl2021.mp2.Task1.GraphNode;
 import it.unicam.cs.asdl2021.mp2.Task1.Graph;
+
+import java.util.Set;
 
 /**
  * 
@@ -56,10 +59,43 @@ public class PrimMSP<L> {
      *        con pesi negativi
      */
     public void computeMSP(Graph<L> g, GraphNode<L> s) {
-        // TODO implementare
-    }
+        if(g==null || s==null) throw new NullPointerException();
+        if(!g.containsNode(s)) throw new IllegalArgumentException("Il nodo non esiste nel grafo passato");
+        if(g.isDirected()) throw new IllegalArgumentException("Il grafo è orientato");
+        for(GraphEdge<L> edge : g.getEdges())
+        {
+            if(!edge.hasWeight() || edge.getWeight()<0)
+                throw new IllegalArgumentException("Esistono archi con valore di peso non accettabile in questo grafo (NaN o <o)");
+        }
 
-    // TODO implementare: inserire eventuali metodi privati per rendere
-    // l'implementazione più modulare
+        for(GraphNode<L> v : g.getNodes())
+        {
+            v.setPriority(Double.NaN);//set priorità iniziale
+            v.setPrevious(null);//annulla il nodo precedente (se presente, altrimenti non cambia nulla)
+        }
+
+        s.setPriority(0);//il nodo sorgente ha priorità 0
+
+        for(GraphNode<L> v : g.getNodes())
+        {
+            this.queue.insert(v);//inserisco tutti i nodi nella queue di priorità
+        }
+
+        while(!this.queue.isEmpty())
+        {
+            GraphNode<L> u = (GraphNode<L>) this.queue.extractMinimum();//al primo passaggio dovrebbe essere estratto il nodo s (con priorità 0)
+            for(GraphNode<L> v : g.getAdjacentNodesOf(u))//si va ad analizzare le adiacenze del nodo u
+            {//viene analizzato ogni arco adiacente di ciascun nodo adiacente
+                for(GraphEdge<L> w : g.getEdgesOf(v))
+                {//se il peso dell'arco è minore della priorità associata al nodo adiacente (corrente)
+                    if(w.getWeight()<v.getPriority())
+                    {//il precedente di v è u
+                        v.setPrevious(u);
+                        v.setPriority(w.getWeight());//e la priorità dell'arco viene registrata sul nodo v
+                    }
+                }
+            }
+        }
+    }
 
 }
