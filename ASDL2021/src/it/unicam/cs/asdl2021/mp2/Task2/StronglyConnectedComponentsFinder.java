@@ -23,7 +23,7 @@ import java.util.Set;
 public class StronglyConnectedComponentsFinder<L> {
 
     Deque<GraphNode<L>> stack = new ArrayDeque<>();
-    Set<GraphNode<L>> scc = new HashSet<>();
+    Set<GraphNode<L>> scc;
     Set<Set<GraphNode<L>>> sccSet = new HashSet<>();
     /*
      * NOTA: per tutti i metodi che ritornano un set utilizzare la classe
@@ -53,13 +53,14 @@ public class StronglyConnectedComponentsFinder<L> {
         // chiama un algoritmo DFS sul grafo
         this.DSF(g);
         Graph<L> reversedGraph = this.reverse(g);//inverte il grafo
-        this.DFSstack(reversedGraph);//chiamo dfs sul grafo invertito
+        this.DFSstack(reversedGraph);//chiama dfs sul grafo invertito, l'ordine di accesso ai nodi è stabilito dallo stack
 
         return sccSet;
     }
 
-
-
+/**
+    Metodo per impostare tutti i nodi del grafo bianchi
+*/
     private void unvisitNodes(Graph<L> g)
     {
         for(GraphNode<L> u : g.getNodes())
@@ -68,6 +69,9 @@ public class StronglyConnectedComponentsFinder<L> {
         }
     }
 
+    /**
+        Primo DFS che richiama la sua parte ricorsiva per ogni nodo del grafo
+     */
     private void DSF(Graph<L> g)
     {
         unvisitNodes(g);
@@ -79,17 +83,29 @@ public class StronglyConnectedComponentsFinder<L> {
         }
     }
 
+    /**
+     Secondo DFS per il grafo invertito che usa i nodi dello stack (Kosaraju), che chiama la sua parte ricorsiva
+     */
+
     private void DFSstack(Graph<L> g)
     {
         unvisitNodes(g);
 
-        for(GraphNode<L> n : stack)
+        while(!stack.isEmpty())
         {
-            DSFRecStack(g, stack.pop());
-            sccSet.add(scc);//aggiungo gli elementi connessi tra loro al set
+            GraphNode<L> popped = stack.pop();
+            if(popped.getColor()==GraphNode.COLOR_WHITE)
+            {
+                scc = new HashSet<GraphNode<L>>();
+                DSFRecStack(g, popped);
+                sccSet.add(scc);//aggiungo gli elementi connessi tra loro al set
+            }
         }
     }
 
+    /**
+        Ricorsione del primo DFS
+     */
     private void DSFvisit(Graph<L> g, GraphNode<L> u) {
 
         u.setColor(GraphNode.COLOR_BLACK);
@@ -104,14 +120,15 @@ public class StronglyConnectedComponentsFinder<L> {
 
         }
         stack.push(u);
-        System.out.println(stack);
+        //System.out.println(stack);
     }
 
+    /**
+         Ricorsione del DFS di Kosaraju
+     */
     private void DSFRecStack(Graph<L> g, GraphNode<L> u)
     {
-
-        if(u.getColor()==GraphNode.COLOR_BLACK) stack.remove(u);//rimuovo dallo stack il nodo se risulta già visitato
-        System.out.println("DFS STACK"+stack);
+        //if(u.getColor()==GraphNode.COLOR_BLACK) stack.remove(u);//rimuovo dallo stack il nodo se risulta già visitato
         u.setColor((GraphNode.COLOR_BLACK));//se non è nero lo coloro
         scc.add(u);//viene aggiunto al set che contiene l'insieme dei cfc dei nodi correnti
         if(!g.getAdjacentNodesOf(u).isEmpty())
@@ -125,11 +142,14 @@ public class StronglyConnectedComponentsFinder<L> {
         }
     }
 
-
+    /**
+        Metodo che inverte un grafo andando a invertire l'ordine dei suoi archi (scambia i nodi)
+        Nel dettaglio crea una copia del grafo originario ma con gli archi invertiti
+     */
     private Graph<L> reverse(Graph<L> g)
     {
         Graph<L> reversedGraph = new MapAdjacentListDirectedGraph<>();
-        for(GraphNode<L> node : g.getNodes())//aggiungo prima tutti i nodi alla lista di adiacenza
+        for(GraphNode<L> node : g.getNodes())//popolo la lista di adiacenza
         {
             reversedGraph.addNode(node);
         }

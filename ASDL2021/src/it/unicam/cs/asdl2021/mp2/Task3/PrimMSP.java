@@ -14,8 +14,7 @@ import it.unicam.cs.asdl2021.mp2.Task1.Graph;
  * nell'esecuzione dell'algoritmo è necessario utilizzare l'operazione di
  * decreasePriority.
  * 
- * @author Template: Luca Tesei, Implementation: INSERIRE NOME E COGNOME DELLO
- *         STUDENTE - INSERIRE ANCHE L'EMAIL xxxx@studenti.unicam.it
+ * @author Template: Luca Tesei, Implementation: Niccolò Cuartas - niccolo.cuartas@studenti.unicam.it
  * 
  * @param <L>
  *                etichette dei nodi del grafo
