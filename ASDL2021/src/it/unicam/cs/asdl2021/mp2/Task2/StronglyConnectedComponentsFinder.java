@@ -3,11 +3,14 @@
  */
 package it.unicam.cs.asdl2021.mp2.Task2;
 
+import it.unicam.cs.asdl2021.mp2.Task1.GraphEdge;
 import it.unicam.cs.asdl2021.mp2.Task1.GraphNode;
 import it.unicam.cs.asdl2021.mp2.Task1.Graph;
+import it.unicam.cs.asdl2021.mp2.Task1.MapAdjacentListDirectedGraph;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -20,6 +23,8 @@ import java.util.Set;
 public class StronglyConnectedComponentsFinder<L> {
 
     Deque<GraphNode<L>> stack = new ArrayDeque<>();
+    Set<GraphNode<L>> scc = new HashSet<>();
+    Set<Set<GraphNode<L>>> sccSet = new HashSet<>();
     /*
      * NOTA: per tutti i metodi che ritornano un set utilizzare la classe
      * HashSet<E> per creare l'insieme risultato. Questo garantisce un buon
@@ -47,19 +52,26 @@ public class StronglyConnectedComponentsFinder<L> {
         //verrà implementato l'algoritmo di Kosaraju
         // chiama un algoritmo DFS sul grafo
         this.DSF(g);
+        Graph<L> reversedGraph = this.reverse(g);//inverte il grafo
+        this.DFSstack(reversedGraph);//chiamo dfs sul grafo invertito
 
-        return null;
+        return sccSet;
     }
 
 
-    private void DSF(Graph<L> g)
-    {
 
+    private void unvisitNodes(Graph<L> g)
+    {
         for(GraphNode<L> u : g.getNodes())
         {
             u.setColor(GraphNode.COLOR_WHITE);
             u.setPrevious(null);
         }
+    }
+
+    private void DSF(Graph<L> g)
+    {
+        unvisitNodes(g);
 
         for(GraphNode<L> u : g.getNodes())
         {
@@ -68,31 +80,60 @@ public class StronglyConnectedComponentsFinder<L> {
         }
     }
 
-    private void DSFvisit(Graph<L> g, GraphNode<L> u){
-
-        u.setColor(GraphNode.COLOR_GREY);
-        if(g.getAdjacentNodesOf(u).isEmpty())
+    private void DFSstack(Graph<L> g)
+    {
+        unvisitNodes(g);
+        for(GraphNode<L> n : stack)
         {
-            u.setColor(GraphNode.COLOR_BLACK);
-            stack.push(u);
-            DSFvisit(g,u.getPrevious());
+            DSFRecStack(g, stack.pop());
+            sccSet.add(scc);//aggiungo gli elementi connessi tra loro al set
         }
-        else{
+    }
+
+    private void DSFvisit(Graph<L> g, GraphNode<L> u) {
+
+        u.setColor(GraphNode.COLOR_BLACK);
+        if (!g.getAdjacentNodesOf(u).isEmpty()) {
             for (GraphNode<L> v : g.getAdjacentNodesOf(u))//scorro ogni nodo collegato (adiacente) a quello passato
             {
                 if (v.getColor() == GraphNode.COLOR_WHITE)//se il nodo non è visitato
                 {
-                    v.setPrevious(u);//il precedente di v è u
                     DSFvisit(g, v);//visito v che diventa u
                 }
-                u.setColor(GraphNode.COLOR_BLACK);//se il nodo è stato visitato, aggiungo il source node (u) allo stack e lo rendo nero
-                stack.push(u);
+            }
+            stack.push(u);
+            System.out.println(stack);
+        }
+    }
 
-                System.out.println(stack);
+    private void DSFRecStack(Graph<L> g, GraphNode<L> u)
+    {
+
+        if(u.getColor()==GraphNode.COLOR_BLACK) stack.remove(u);//rimuovo dallo stack il nodo se risulta già visitato
+
+        u.setColor((GraphNode.COLOR_BLACK));//se non è nero lo coloro
+        scc.add(u);//viene aggiunto al set che contiene l'insieme dei cfc
+        if(!g.getAdjacentNodesOf(u).isEmpty())
+        {
+            for(GraphNode<L> v : g.getAdjacentNodesOf(u))
+            {
+                if(v.getColor() == GraphNode.COLOR_WHITE) {
+                    DSFRecStack(g, v);
+                }
             }
         }
     }
 
+
+    private Graph<L> reverse(Graph<L> g)
+    {
+        Graph<L> reversedGraph = new MapAdjacentListDirectedGraph<>();
+        for(GraphEdge<L> edge : g.getEdges())
+        {
+            reversedGraph.addEdge(new GraphEdge<L>(edge.getNode2(), edge.getNode1(), true));
+        }
+        return reversedGraph;
+    }
 
     }
 
