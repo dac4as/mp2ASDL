@@ -202,6 +202,7 @@ public class MapAdjacentListDirectedGraph<L> extends Graph<L> {
         if(!this.containsNode(edge.getNode1()) || !this.containsNode(edge.getNode2()) || (this.isDirected() && !edge.isDirected()) || (!this.isDirected() && edge.isDirected())) throw new IllegalArgumentException();
 
         return this.getEdgesOf(edge.getNode1()).add(edge);
+        //return true;
     }
 
     @Override

@@ -65,7 +65,6 @@ public class StronglyConnectedComponentsFinder<L> {
         for(GraphNode<L> u : g.getNodes())
         {
             u.setColor(GraphNode.COLOR_WHITE);
-            u.setPrevious(null);
         }
     }
 
@@ -83,6 +82,7 @@ public class StronglyConnectedComponentsFinder<L> {
     private void DFSstack(Graph<L> g)
     {
         unvisitNodes(g);
+
         for(GraphNode<L> n : stack)
         {
             DSFRecStack(g, stack.pop());
@@ -101,18 +101,19 @@ public class StronglyConnectedComponentsFinder<L> {
                     DSFvisit(g, v);//visito v che diventa u
                 }
             }
-            stack.push(u);
-            System.out.println(stack);
+
         }
+        stack.push(u);
+        System.out.println(stack);
     }
 
     private void DSFRecStack(Graph<L> g, GraphNode<L> u)
     {
 
         if(u.getColor()==GraphNode.COLOR_BLACK) stack.remove(u);//rimuovo dallo stack il nodo se risulta già visitato
-
+        System.out.println("DFS STACK"+stack);
         u.setColor((GraphNode.COLOR_BLACK));//se non è nero lo coloro
-        scc.add(u);//viene aggiunto al set che contiene l'insieme dei cfc
+        scc.add(u);//viene aggiunto al set che contiene l'insieme dei cfc dei nodi correnti
         if(!g.getAdjacentNodesOf(u).isEmpty())
         {
             for(GraphNode<L> v : g.getAdjacentNodesOf(u))
@@ -128,7 +129,11 @@ public class StronglyConnectedComponentsFinder<L> {
     private Graph<L> reverse(Graph<L> g)
     {
         Graph<L> reversedGraph = new MapAdjacentListDirectedGraph<>();
-        for(GraphEdge<L> edge : g.getEdges())
+        for(GraphNode<L> node : g.getNodes())//aggiungo prima tutti i nodi alla lista di adiacenza
+        {
+            reversedGraph.addNode(node);
+        }
+        for(GraphEdge<L> edge : g.getEdges())//dopo aver creato la lista di adiacenza, aggiungo gli archi invertiti
         {
             reversedGraph.addEdge(new GraphEdge<L>(edge.getNode2(), edge.getNode1(), true));
         }
