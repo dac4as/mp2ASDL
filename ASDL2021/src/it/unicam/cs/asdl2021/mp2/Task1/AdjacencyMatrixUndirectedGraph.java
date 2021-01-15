@@ -3,6 +3,7 @@
  */
 package it.unicam.cs.asdl2021.mp2.Task1;
 
+import javax.swing.*;
 import java.util.*;
 
 /**
@@ -86,8 +87,8 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
 
     @Override
     public void clear() {
-        this.matrix = new ArrayList<ArrayList<GraphEdge<L>>>();
-        this.nodesIndex = new HashMap<GraphNode<L>, Integer>();
+        this.matrix.clear();// = new ArrayList<ArrayList<GraphEdge<L>>>();
+        this.nodesIndex.clear(); //= new HashMap<GraphNode<L>, Integer>();
     }
 
     @Override
@@ -106,7 +107,15 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
         if (node==null) throw new NullPointerException();
         if (this.containsNode(node)) return false;
 
-        nodesIndex.put(node,nodeCount());
+        nodesIndex.put(node, nodeCount());
+        matrix.add(new ArrayList<GraphEdge<L>>());
+        for(ArrayList<GraphEdge<L>> indexes : matrix)
+        {
+            for(int i=indexes.size();i<this.nodeCount();i++)
+            {
+                matrix.add(null);
+            }
+        }
         return true;
     }
 
@@ -139,6 +148,8 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
     public int getNodeIndexOf(L label) {
         if (label == null)
             throw new NullPointerException("Tentativo di ricercare un nodo con etichetta null");
+//TODO
+        //System.out.println(nodesIndex.keySet());
 
         return nodesIndex.get(this.getNodeOf(label));
     }
@@ -190,11 +201,19 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
     }
 
     @Override
-    public boolean addEdge(GraphEdge<L> edge) {
+    public boolean addEdge(GraphEdge<L> edge) {//due grafi NON ORIENTATI sono uguali secondo EQUALS se sono non orientati, e devono essere entrambi aggiunti
         if(edge==null) throw new NullPointerException("Nodo passato è nullo");
-        if(!this.containsNode(edge.getNode1()) || !this.containsNode(edge.getNode2()) || (this.isDirected() && !edge.isDirected()) || (!this.isDirected() && edge.isDirected())) throw new IllegalArgumentException();
+        if(this.isDirected() || !this.containsNode(edge.getNode1()) || !this.containsNode(edge.getNode2()) || edge.isDirected()) throw new IllegalArgumentException();
+        if(this.containsEdge(edge)) return false;
 
-        return this.containsEdge(edge);
+        int indexNode1 = this.getNodeIndexOf(edge.getNode1().getLabel());
+        int indexNode2 = this.getNodeIndexOf(edge.getNode2().getLabel());
+        this.matrix.get(indexNode1).set(indexNode2, edge);
+        if(!edge.getNode1().equals(edge.getNode2()))//se i nodi collegati sono diversi, vanno aggiunti sia su i,j che su j,i nella matrice
+        {
+            this.matrix.get(indexNode2).set(indexNode1, edge);
+        }
+        return true;
     }
 
     @Override
@@ -214,6 +233,13 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
         if(!this.containsNode(node)) throw new IllegalArgumentException("Nodo non esiste");
 
         return new HashSet<>(matrix.get(nodesIndex.get(node)));
+        /*Set<GraphEdge<L>> toReturn = new HashSet<>();
+        for(GraphEdge<L> edge : this.matrix.get(this.getNodeIndexOf(node.getLabel())))
+        {
+            if(edge!=null)
+                toReturn.add(edge);
+        }
+        return toReturn;*/
     }
 
     @Override

@@ -4,6 +4,7 @@ import it.unicam.cs.asdl2021.mp2.Task1.GraphEdge;
 import it.unicam.cs.asdl2021.mp2.Task1.GraphNode;
 import it.unicam.cs.asdl2021.mp2.Task1.Graph;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -70,11 +71,12 @@ public class PrimMSP<L> {
 
         for(GraphNode<L> v : g.getNodes())
         {
-            v.setPriority(Double.NaN);//set priorità iniziale
+            v.setPriority(Integer.MAX_VALUE);//set priorità iniziale
             v.setPrevious(null);//annulla il nodo precedente (se presente, altrimenti non cambia nulla)
         }
 
-        s.setPriority(0);//il nodo sorgente ha priorità 0
+        queue.decreasePriority(s, 0);//il nodo sorgente ha priorità 0
+        Set<GraphNode<L>> visitedNodes = new HashSet<>();
 
         for(GraphNode<L> v : g.getNodes())
         {
@@ -87,14 +89,18 @@ public class PrimMSP<L> {
             for(GraphNode<L> v : g.getAdjacentNodesOf(u))//si va ad analizzare le adiacenze del nodo u
             {//viene analizzato ogni arco adiacente di ciascun nodo adiacente
                 for(GraphEdge<L> w : g.getEdgesOf(v))
-                {//se il peso dell'arco è minore della priorità associata al nodo adiacente (corrente)
-                    if(w.getWeight()<v.getPriority())
+                {//se queue contiene il nodo v E se il peso dell'arco è minore della priorità associata al nodo adiacente (corrente)
+
+
+                    if(this.queue.getTernaryHeap().contains(v) && w.getWeight()<v.getPriority())
                     {//il precedente di v è u
                         v.setPrevious(u);
-                        v.setPriority(w.getWeight());//e la priorità dell'arco viene registrata sul nodo v
+                        //v.setPriority(w.getWeight());//e la priorità dell'arco viene registrata sul nodo v
+                        queue.decreasePriority(v, w.getWeight());
                     }
                 }
             }
+            visitedNodes.add(u);
         }
     }
 
