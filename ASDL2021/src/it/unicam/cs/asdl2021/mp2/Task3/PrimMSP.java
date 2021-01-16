@@ -63,10 +63,11 @@ public class PrimMSP<L> {
         if(g==null || s==null) throw new NullPointerException();
         if(!g.containsNode(s)) throw new IllegalArgumentException("Il nodo non esiste nel grafo passato");
         if(g.isDirected()) throw new IllegalArgumentException("Il grafo è orientato");
+        System.out.println(g.getEdges());
         for(GraphEdge<L> edge : g.getEdges())
         {
             if(!edge.hasWeight() || edge.getWeight()<0)
-                throw new IllegalArgumentException("Esistono archi con valore di peso non accettabile in questo grafo (NaN o <o)");
+                throw new IllegalArgumentException("Esistono archi con valore di peso non accettabile in questo grafo (NaN o <0)");
         }
 
         for(GraphNode<L> v : g.getNodes())

@@ -35,9 +35,11 @@ class PrimMSPTest {
         gr.addNode(h);
         GraphNode<String> i = new GraphNode<String>("i");
         gr.addNode(i);
+        //gr.addEdge(new GraphEdge<String>(a, a, false, 4));
         gr.addEdge(new GraphEdge<String>(a, b, false, 4));
         gr.addEdge(new GraphEdge<String>(a, h, false, 8.5));
         gr.addEdge(new GraphEdge<String>(b, h, false, 11));
+        System.out.println(gr.getEdgesOf(a));
         gr.addEdge(new GraphEdge<String>(b, c, false, 8));
         gr.addEdge(new GraphEdge<String>(c, i, false, 2));
         gr.addEdge(new GraphEdge<String>(c, d, false, 7));

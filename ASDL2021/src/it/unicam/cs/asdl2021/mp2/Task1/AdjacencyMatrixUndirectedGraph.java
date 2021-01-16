@@ -109,11 +109,23 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
 
         nodesIndex.put(node, nodeCount());
         matrix.add(new ArrayList<GraphEdge<L>>());
-        for(ArrayList<GraphEdge<L>> indexes : matrix)
+        for(int k=0; k<this.nodeCount();k++)
         {
-            for(int i=indexes.size();i<this.nodeCount();i++)
+            matrix.get(nodeCount()-1).add(null);
+        }
+
+
+        for(ArrayList<GraphEdge<L>> indexes : matrix)//compenso le altre liste dalla matrice
+        {
+            /*for (int i = indexes.size(); i < this.nodeCount()-1; i++) {//riempio la riga di valori vuoti al momento dell'inserimento del nuovo nodo
+                matrix.get(i).add(null);
+            }*/
+            if(matrix.get(matrix.indexOf(indexes)).size() < matrix.size())
             {
-                matrix.add(null);
+                for(int i=matrix.get(matrix.indexOf(indexes)).size();i< matrix.size();i++)
+                {
+                    matrix.get(matrix.indexOf(indexes)).add(null);
+                }
             }
         }
         return true;
@@ -194,9 +206,10 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
         if(this.matrix==null) return null;
         Set<GraphEdge<L>> setEdges = new HashSet<>();
 
-        for (ArrayList<GraphEdge<L>> edgeList: matrix) {
+        for (ArrayList<GraphEdge<L>> edgeList : matrix) {
             setEdges.addAll(edgeList);
         }
+        setEdges.remove(null);
         return setEdges;
     }
 
@@ -232,14 +245,14 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
         if(node==null) throw new NullPointerException("Nodo nullo");
         if(!this.containsNode(node)) throw new IllegalArgumentException("Nodo non esiste");
 
-        return new HashSet<>(matrix.get(nodesIndex.get(node)));
-        /*Set<GraphEdge<L>> toReturn = new HashSet<>();
+        //return new HashSet<>(matrix.get(nodesIndex.get(node))); //evitato perchè aggiunge un elemento null a indice 0
+        Set<GraphEdge<L>> toReturn = new HashSet<>();
         for(GraphEdge<L> edge : this.matrix.get(this.getNodeIndexOf(node.getLabel())))
         {
             if(edge!=null)
                 toReturn.add(edge);
         }
-        return toReturn;*/
+        return toReturn;
     }
 
     @Override
