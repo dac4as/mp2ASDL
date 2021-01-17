@@ -111,11 +111,11 @@ public class AdjacencyMatrixUndirectedGraph<L> extends Graph<L> {
         matrix.add(new ArrayList<GraphEdge<L>>());
         for(int k=0; k<this.nodeCount();k++)
         {
-            matrix.get(nodeCount()-1).add(null);
+            matrix.get(nodeCount()-1).add(null);//riempio il nuovo array appena inserito di null
         }
 
 
-        for(ArrayList<GraphEdge<L>> indexes : matrix)//compenso le altre liste dalla matrice
+        for(ArrayList<GraphEdge<L>> indexes : matrix)//compenso le altre liste dalla matrice con i null mancanti
         {
             /*for (int i = indexes.size(); i < this.nodeCount()-1; i++) {//riempio la riga di valori vuoti al momento dell'inserimento del nuovo nodo
                 matrix.get(i).add(null);

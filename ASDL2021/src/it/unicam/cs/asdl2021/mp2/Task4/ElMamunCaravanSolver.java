@@ -5,8 +5,7 @@ package it.unicam.cs.asdl2021.mp2.Task4;
  * Class that solves an instance of the the El Mamun's Caravan problem using
  * dynamic programming.
  * 
- * Template: Daniele Marchei and Luca Tesei, Implementation: INSERIRE NOME E
- * COGNOME DELLO STUDENTE - INSERIRE ANCHE L'EMAIL xxxx@studenti.unicam.it
+ * Template: Daniele Marchei and Luca Tesei, Implementation: Niccolò Cuartas - niccolo.cuartas@studenti.unicam.it
  *
  */
 public class ElMamunCaravanSolver {
@@ -16,11 +15,11 @@ public class ElMamunCaravanSolver {
 
     // table to collect the optimal solution for each sub-problem,
     // protected just for Junit Testing purposes
-    protected Integer[][] table;
+    protected Integer[][] table; //TABELLA M
 
     // table to record the chosen optimal solution among the optimal solution of
     // the sub-problems, protected just for JUnit Testing purposes
-    protected Integer[][] tracebackTable;
+    protected Integer[][] tracebackTable; //TABELLA S
 
     // flag indicating that the problem has been solved at least once
     private boolean solved;
@@ -38,7 +37,9 @@ public class ElMamunCaravanSolver {
             throw new NullPointerException(
                     "Creazione di solver con expression null");
         this.expression = expression;
-        // TODO implementare
+        this.table = new Integer[expression.size()][expression.size()];
+        this.tracebackTable = new Integer[expression.size()][expression.size()];
+        this.solved = false;
     }
 
     /**
@@ -60,8 +61,36 @@ public class ElMamunCaravanSolver {
      * @throws NullPointerException
      *                                  if the objective function is null
      */
-    public void solve(ObjectiveFunction function) {
-        // TODO implementare
+    public void solve(ObjectiveFunction function) {//può essere MinimumFuncion o MaximumFunction, deve contenere il risulato massimo/minimo ottenibile in base a cosa richiesto
+        if(function==null) throw new NullPointerException();
+        if(isSolved()) return;
+
+        for (int i=0; i<expression.size()-1;i++)
+        {
+            table[i][i] = 0;
+            tracebackTable[i][i] =-1;
+
+        }
+        //struttura della matrice table
+        for(int h = 1; h<expression.size()-1; h++)
+        {
+            for(int i = 0; i<expression.size()-h; i++)
+            {
+                int j = i + h;
+                table[i][j] = Integer.MAX_VALUE;
+                tracebackTable[i][j]=-1;
+                for(int k=i;k<j;k++)
+                {
+                    int cost =(int) expression.get(i).getValue() * (int) expression.get(k+1).getValue() * (int) expression.get(j+1).getValue();
+                    if(table[i][j] > (table[i][k] + table[k+1][j] + cost))
+                    {
+                        table[i][j] = table[i][k] + table[k+1][j]+ cost;
+                        table[i][j] = k;
+                    }
+                }
+            }
+        }
+this.solved=true;
     }
 
     /**
@@ -74,8 +103,8 @@ public class ElMamunCaravanSolver {
      *                                   if the problem has never been solved
      */
     public int getOptimalSolution() {
-        // TODO implementare
-        return -1;
+        if(!isSolved()) throw new IllegalArgumentException("Il problema non è stato risolto.");
+        return table[0][expression.size()-2];
     }
 
     /**
@@ -95,7 +124,7 @@ public class ElMamunCaravanSolver {
      *                                   if the problem has never been solved
      */
     public String getOptimalParenthesization() {
-        // TODO implementare
+        if(!isSolved()) throw new IllegalStateException("Il problema non è stato risolto.");
         return null;
     }
 
